@@ -3,6 +3,7 @@ from tkinter import ttk
 import os
 import time
 import sys
+import serial
 
 
 class Crosshair():
@@ -98,11 +99,14 @@ class KeyboardControlFrame(tk.Frame):
         self.vel_y = 0
         self.vel_z = 0
 
+
         self._create_widget()
         self._bind_keys()
 
-
+        self._open_serial_port()
         self.root.after(10, self._move_pos)
+
+
 
         # OS key repeat turned off. This is needed to prevent keypress bug
 
@@ -115,10 +119,10 @@ class KeyboardControlFrame(tk.Frame):
         self.pos_lb = tk.Label(self, textvariable=self.pos_lb_text)
 
         # Genreate the canvas and objects
-        self.canv = tk.Canvas(self.root, width=self.canv_w, height=self.canv_h)
+        self.canv = tk.Canvas(self.root, width=self.canv_w, height=self.canv_h, bg="white")
         self.crosshair = Crosshair(self)
 
-        self.canv.pack()
+        self.canv.pack(pady=10, padx=10)
         self.pos_lb.pack()
 
     def _bind_keys(self):
@@ -156,6 +160,45 @@ class KeyboardControlFrame(tk.Frame):
         USAGE: Function for the decoding the keypress event
         """
         self.keys[event.char]._key_pressed()
+
+    def _open_serial_port(self):
+        """
+        USAGE: Function checking if the serial port is not open
+        """
+        # Initilise variables
+        self.port_open = False
+
+        try:
+            # begin arduino
+            serial_port ="/dev/ttyACM0"
+            b_rate = 9600
+            arduino_timeout = 0.001
+            self.arduino = serial.Serial(port=serial_port, baudrate=b_rate, timeout=arduino_timeout)
+
+            self.port_open = True
+            self.debug = 0
+            self.send_timer = 0
+            print("Serial Port is open")
+        except IOError:
+            print("Serial port not open.")
+            print("Check if serial montior is open or if Arduino is plugged in.")
+
+
+    def _write_to_serial(self):
+        """
+        USAGE: Function for the serial writing of the poition
+        """
+        tx_string = str(self.x) + "," + str(self.y) + "\n"
+        self.arduino.write(bytes(tx_string, "utf-8"))
+        print(tx_string)
+        if self.debug:
+
+            data = self.arduino.readline().decode()
+            if not data:
+                return
+            print(data)
+
+
 
     def _move_pos(self):
         """
@@ -197,7 +240,18 @@ class KeyboardControlFrame(tk.Frame):
         # Update the label
         self.pos_lb_text.set("Position:  x: " + str(self.x)
                              + ", y: " + str(self.y) + ", z: " + str(self.z))
+
+
+        # Send position to arduino
+        if self.port_open:
+            if self.send_timer >1000:
+                self._write_to_serial()
+                self.send_timer = 0
+            self.send_timer +=1
+
         self.root.after(10, self._move_pos)
+
+
 
     def calc_vel(self, dir, state):
 
