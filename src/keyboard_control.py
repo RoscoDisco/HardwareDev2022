@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 import os
 import time
+import sys
 
 
 class Crosshair():
@@ -100,15 +101,7 @@ class KeyboardControlFrame(tk.Frame):
         self._create_widget()
         self._bind_keys()
 
-        self.keys = {
-            "\uf700": KeyPressClass(self, "Up"),
-            "\uf701": KeyPressClass(self, "Down"),
-            "\uf702": KeyPressClass(self, "Left"),
-            "\uf703": KeyPressClass(self, "Right"),
-            "r": KeyPressClass(self, "In"),
-            "f": KeyPressClass(self, "Out"),
 
-        }
         self.root.after(10, self._move_pos)
 
         # OS key repeat turned off. This is needed to prevent keypress bug
@@ -134,6 +127,27 @@ class KeyboardControlFrame(tk.Frame):
         """
 
         self.root.bind("<KeyPress>", self._key_press)
+
+        # Check the os
+        current_platform = sys.platform
+        if current_platform == "linux":
+            self.keys = {
+                "w": KeyPressClass(self, "Up"),
+                "s": KeyPressClass(self, "Down"),
+                "a": KeyPressClass(self, "Left"),
+                "d": KeyPressClass(self, "Right"),
+                "r": KeyPressClass(self, "In"),
+                "f": KeyPressClass(self, "Out"),
+            }
+        else:
+            self.keys = {
+                "\uf700": KeyPressClass(self, "Up"),
+                "\uf701": KeyPressClass(self, "Down"),
+                "\uf702": KeyPressClass(self, "Left"),
+                "\uf703": KeyPressClass(self, "Right"),
+                "r": KeyPressClass(self, "In"),
+                "f": KeyPressClass(self, "Out"),
+            }
 
         # self.root.bind("<KeyRelease>", self._key_release)
 
