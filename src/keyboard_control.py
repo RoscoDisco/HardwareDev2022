@@ -9,20 +9,29 @@ import serial
 class Crosshair():
     """docstring for Crosshair."""
 
-    def __init__(self, frame):
+    def __init__(self, frame, w, h):
         super(Crosshair, self).__init__()
         self.p_frame = frame
-        self.rect_w = 100
-        self.rect_h = 100
+        self.w = w
+        self.h = h
+        self.ch_thickness =2
         self._create_widget()
 
     def calc_pos(self):
-        x1_1 = self.p_frame.x
-        x2_1 = x1_1 + self.rect_w
-        y1_1 = self.p_frame.y
-        y2_1 = y1_1 + self.rect_h
+        # Plot horizontal line
+        x1_1 = self.p_frame.x - self.w/2
+        x1_2 = self.p_frame.x + self.w/2
+        y1_1 = self.p_frame.y - self.ch_thickness
+        y1_2 = self.p_frame.y + self.ch_thickness
 
-        return x1_1, y1_1, x2_1, y2_1
+        # Plot vertical line
+        x2_1 = self.p_frame.x - self.ch_thickness
+        x2_2 = self.p_frame.x + self.ch_thickness
+        y2_1 = self.p_frame.y - self.h/2
+        y2_2 = self.p_frame.y + self.h/2
+
+
+        return x1_1, y1_1, x1_2, y1_2, x2_1, y2_1, x2_2, y2_2
 
     def _create_widget(self):
         """
@@ -30,8 +39,10 @@ class Crosshair():
         for targeting the robot
         """
         coords = self.calc_pos()
-        self.rect = self.p_frame.canv.create_rectangle(
-            coords[0], coords[1], coords[2], coords[3], fill="red")
+        self.rect1 = self.p_frame.canv.create_rectangle(
+            coords[0], coords[1], coords[2], coords[3], fill="red", outline="red")
+        self.rect2 = self.p_frame.canv.create_rectangle(
+            coords[4], coords[5], coords[6], coords[7], fill="red", outline="red")
 
     def move(self):
         """
@@ -44,7 +55,9 @@ class Crosshair():
             coords[0], coords[1], coords[2], coords[3], fill="red")
         '''
         self.p_frame.canv.move(
-            self.rect, self.p_frame.vel_x, self.p_frame.vel_y)
+            self.rect1, self.p_frame.vel_x, self.p_frame.vel_y)
+        self.p_frame.canv.move(
+            self.rect2, self.p_frame.vel_x, self.p_frame.vel_y)
 
 
 class KeyPressClass(object):
@@ -120,7 +133,7 @@ class KeyboardControlFrame(tk.Frame):
 
         # Genreate the canvas and objects
         self.canv = tk.Canvas(self.root, width=self.canv_w, height=self.canv_h, bg="white")
-        self.crosshair = Crosshair(self)
+        self.crosshair = Crosshair(self, self.ch_w, self.ch_h)
 
         self.canv.pack(pady=10, padx=10)
         self.pos_lb.pack()
@@ -220,18 +233,18 @@ class KeyboardControlFrame(tk.Frame):
         self.y += self.vel_y
         self.z += self.vel_z
 
-        if self.x < 0:
-            self.x = 0
+        if self.x < self.ch_w/2:
+            self.x = self.ch_w/2
             self.vel_x = 0
-        elif self.x > self.canv_w - 100:
-            self.x = self.canv_w - 100
+        elif self.x > self.canv_w - self.ch_w/2:
+            self.x = self.canv_w - self.ch_w/2
             self.vel_x = 0
 
-        if self.y < 0:
-            self.y = 0
+        if self.y < self.ch_h/2:
+            self.y = self.ch_h/2
             self.vel_y = 0
-        elif self.y > self.canv_h - 100:
-            self.y = self.canv_h - 100
+        elif self.y > self.canv_h - self.ch_h/2:
+            self.y = self.canv_h - self.ch_h/2
             self.vel_y = 0
 
         # Update the canv obj
