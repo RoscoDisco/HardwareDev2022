@@ -10,16 +10,17 @@ def write_read(x, arduino):
 
 
 def main():
-    serial_port ="/dev/ttyACM0"
+    serial_port = "/dev/cu.usbmodem1411301"
     b_rate = 9600
     arduino_timeout = 0.1
-    arduino = serial.Serial(port=serial_port, baudrate=b_rate, timeout=arduino_timeout)
-
+    arduino = serial.Serial(
+        port=serial_port, baudrate=b_rate, timeout=arduino_timeout)
 
     while True:
-        num = input("Enter a number: ") # Taking input from user
+        num = input("Enter a number: ")  # Taking input from user
         value = write_read(num, arduino)
-        print(value) # printing the value
+        print(value)  # printing the value
+
 
 if __name__ == '__main__':
     main()
