@@ -172,17 +172,17 @@ class KeyboardControlFrame(tk.Frame):
         self.pos_lb_text.set("Position:  x: " + str(self.x)
                              + ", y: " + str(self.y) + ", z: " + str(self.z))
 
-        self.pos_lb = tk.Label(self, textvariable=self.pos_lb_text)
+        self.pos_lb = tk.Label(self.root, textvariable=self.pos_lb_text)
 
         # Genreate the canvas and objects
         self.canv = tk.Canvas(self.root, width=self.canv_w,
                               height=self.canv_h, bg="white")
         self.crosshair = Crosshair(self, self.ch_w, self.ch_h)
-        self.info_frame = ArduinoInfoFrame(self)
+        self.info_frame = ArduinoInfoFrame(self.root)
 
-        self.canv.grid(row=0, pady=10, padx=10)
-        self.pos_lb.grid(row=1, pady=2, padx=2)
-        self.info_frame.grid(row=2, pady=2, padx=2)
+        self.canv.grid(row=0, pady=10, padx=10, sticky=tk.NSEW)
+        self.pos_lb.grid(row=1, pady=2, padx=2, sticky=tk.NSEW)
+        self.info_frame.grid(row=5, pady=2, padx=2, sticky=tk.NSEW)
 
     def _bind_keys(self):
         """
@@ -253,7 +253,6 @@ class KeyboardControlFrame(tk.Frame):
         if self.debug:
             self.info_frame.add_text(
                 "{:.3f}".format(time.time() - self.start_time) + " Transmitted: " + tx_string)
-            self._read_from_serial()
 
     def _read_from_serial(self):
         """
@@ -311,6 +310,7 @@ class KeyboardControlFrame(tk.Frame):
         if self.port_open:
             if self.send_timer > 60:
                 self._write_to_serial()
+                self._read_from_serial()
                 self.send_timer = 0
             self.send_timer += 1
 
