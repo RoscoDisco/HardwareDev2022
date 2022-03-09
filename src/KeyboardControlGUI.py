@@ -259,11 +259,15 @@ class KeyboardControlFrame(tk.Frame):
         USAGE: Function for reading information over the serial port from the
         arduino
         """
-        data = self.arduino.readline().decode()
-        if not data or data == "":
+        try:
+            data = self.arduino.readline()
+            data = data.decode()
+            if not data or data == "":
+                return
+            data.rstrip()
+            self.info_frame.add_text("Reieved: " + data)
+        except:
             return
-        data.rstrip()
-        self.info_frame.add_text("Reieved: " + data)
 
     def _move_pos(self):
         """
