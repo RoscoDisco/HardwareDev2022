@@ -15,7 +15,7 @@ class Haptic_2_Arduino{
     ros::NodeHandle nh_;
 
     // ROS publisher
-    ros::Publisher updated_pose_;
+    ros::Publisher pose_pub_;
 
     // ROS subscriber
     ros::Subscriber haptic_pose_;
@@ -26,7 +26,7 @@ class Haptic_2_Arduino{
 
 
         // Setup publisher
-        updated_pose_ = nh_.advertise<geometry_msgs::PoseStamped>("/haptic/updated_pose", 1);
+        pose_pub_ = nh_.advertise<geometry_msgs::PoseStamped>("/haptic/updated_pose", 1);
         // Setup subscriber
         haptic_pose_ = nh_.subscribe("Left/Pose", 1, &Haptic_2_Arduino::Pose_Callback, this);
     }
@@ -49,6 +49,8 @@ class Haptic_2_Arduino{
 
 
       ROS_INFO("x: %f, y: %f, z: %f", updated_pose.pose.position.x,updated_pose.pose.position.y, updated_pose.pose.position.z);
+
+      pose_pub_.publish(updated_pose);
     }
 };
 
